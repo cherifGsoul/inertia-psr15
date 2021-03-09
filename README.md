@@ -1,5 +1,7 @@
 # inertia-psr15
 
+Before using this library, is important to know [what is Inertia.js](https://inertiajs.com/#top), [what is it for](https://inertiajs.com/who-is-it-for) and [how it works](https://inertiajs.com/how-it-works), in the [official Inertia.js website](https://inertiajs.com/)
+
 PHP PSR-15 [InertiaJS](https://inertiajs.com/) server-side adapter, it can be used with [Mezzio](https://mezzio.dev/), [Slim](https://www.slimframework.com/) or any framework that implements PSR-15 interfaces.
 
 The adapter is a PSR-15 middleware to detect InertiaJS requests and prepare and send Response to be read and rendered 
@@ -24,7 +26,7 @@ A [small application](https://github.com/cherifGsoul/mezzio-inertia-demo) was ma
 
 The adapter is designed to work with [Mezzio](https://mezzio.dev/) with little effort, in the following we assume that 
 a Mezzio application was generated using [Mezzio Skeleton](https://github.com/mezzio/mezzio-skeleton) and Twig
-was selected as template engine:
+was selected as the template engine:
 
 ### Installation:
 
