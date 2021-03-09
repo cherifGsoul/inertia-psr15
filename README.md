@@ -1,6 +1,6 @@
 # inertia-psr15
 
-PHP PSR-15 [InertiaJS](https://inertiajs.com/) server-side adapter.
+PHP PSR-15 [InertiaJS](https://inertiajs.com/) server-side adapter, it can be used with [Mezzio](https://mezzio.dev/), [Slim](https://www.slimframework.com/) or any framework that implements PSR-15 interfaces.
 
 The adapter is a PSR-15 middleware to detect InertiaJS requests and prepare and send Response to be read and rendered 
 by InertiaJS front-end components, the usage after installation and configuration can be easy as: 
@@ -16,7 +16,11 @@ return $inertia->render('MyFrontEndComponent', [
 ]);
 ```
 
+
+
 ## Usage:
+
+A [small application](https://github.com/cherifGsoul/mezzio-inertia-demo) was made to demonstrate how this adapter can be used in Mezzio application.
 
 The adapter is designed to work with [Mezzio](https://mezzio.dev/) with little effort, in the following we assume that 
 a Mezzio application was generated using [Mezzio Skeleton](https://github.com/mezzio/mezzio-skeleton) and Twig
