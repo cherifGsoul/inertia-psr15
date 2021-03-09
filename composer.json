@@ -1,0 +1,45 @@
+{
+    "name": "cherif/inertia-psr15",
+    "description": "InertiaJS server-side adapter for PSR-7 and PSR-15 applications",
+    "type": "library",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Cherif BOUCHELAGHEM",
+            "email": "cherif.bouchelaghem@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "psr/http-server-middleware": "^1.0"
+    },
+    "require-dev": {
+        "laminas/laminas-diactoros": "^2.5",
+        "mezzio/mezzio-template": "^2.0",
+        "phpspec/prophecy-phpunit": "^2.0",
+        "phpunit/phpunit": "^9.4",
+        "psr/container": "^1.0",
+        "twig/twig": "^3.0"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laminas": {
+            "config-provider": "Cherif\\InertiaPsr15\\ConfigProvider"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Cherif\\InertiaPsr15\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "InertiaPsr15Test\\": "test/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --colors=always"
+    }
+}
