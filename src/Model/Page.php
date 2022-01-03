@@ -31,17 +31,11 @@ final class Page implements JsonSerializable
         return new Page();
     }
 
-    /**
-     * 
-     */
     public function getComponent(): string
     {
         return $this->component;
     }
 
-    /**
-     * 
-     */
     public function withComponent(string $component): self
     {
         $page = clone $this;
@@ -50,17 +44,11 @@ final class Page implements JsonSerializable
     }
 
 
-    /**
-     * 
-     */
     public function getProps(): array
     {
         return $this->props;
     }
 
-    /**
-     * 
-     */
     public function withProps(array $props): self
     {
         $page = clone $this;
@@ -73,9 +61,6 @@ final class Page implements JsonSerializable
         return $this->url;
     }
 
-    /**
-     * 
-     */
     public function withUrl(string $url): self
     {
         $page = clone $this;
@@ -83,17 +68,11 @@ final class Page implements JsonSerializable
         return $page;
     }
 
-    /**
-     * 
-     */
     public function getVersion(): ?string
     {
         return $this->version;
     }
 
-    /**
-     * 
-     */
     public function withVersion(string $version): self
     {
         $page = clone $this;
@@ -101,7 +80,8 @@ final class Page implements JsonSerializable
         return $page;
     }
 
-    public function jsonSerialize()
+    /** @return array<string, mixed> */
+    public function jsonSerialize(): array
     {
         return [
             'component' => $this->getComponent(),
