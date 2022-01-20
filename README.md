@@ -18,6 +18,9 @@ return $inertia->render('MyFrontEndComponent', [
 ]);
 ```
 
+# Copyright
+Mohammed Cherif BOUCHELAGHEM 2021
+
 
 
 ## Usage:
