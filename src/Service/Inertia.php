@@ -35,7 +35,6 @@ class Inertia implements InertiaInterface
     {
         $this->page = $this->page
                         ->withComponent($component)
-                        ->withProps($props)
                         ->withUrl((string)$this->request->getUri());
 
         if ($this->request->hasHeader('X-Inertia-Partial-Data')) {

@@ -91,4 +91,57 @@ class InertiaTest extends TestCase
         $this->assertInstanceOf(ResponseInterface::class, $returnedResponse);
         $this->assertNotSame($response, $returnedResponse);
     }
+
+
+    public function testRenderReturnPartialDataWhenHeaderContainsPartialData()
+    {
+        $request = $this->prophesize(ServerRequestInterface::class);
+        $request->hasHeader('X-Inertia')->willReturn(true);
+        $request->hasHeader('X-Inertia-Partial-Data')->willReturn(true);
+        $request->getHeaderLine('X-Inertia-Partial-Component')->willReturn(Argument::type('string'));
+        $request->getHeader('X-Inertia-Partial-Data')->willReturn([
+            'key2'
+        ]);
+        $json = '{"component":"type(string)","props":{"key2":"value2"},"url":"callback()","version":null}';
+        $jsonResponse = null;
+
+        $uri = $this->prophesize(UriInterface::class);
+        $request->getUri()->willReturn(Argument::that([$uri, 'reveal']));
+
+        $response = $this->prophesize(ResponseInterface::class);
+        $responseFactory = $this->prophesize(ResponseFactoryInterface::class);
+        $responseFactory->createResponse()->willReturn($response);
+
+        $stream = $this->prophesize(StreamInterface::class);
+        $streamFactory = $this->prophesize(StreamFactoryInterface::class);
+        $streamFactory->createStream(Argument::type('string'))->will(function ($args) use (&$jsonResponse, $stream){
+            $jsonResponse = $args[0];
+            return $stream;
+        });
+
+        $rootViewProvider = $this->prophesize(RootViewProviderInterface::class);
+
+        $response->withBody($stream->reveal())->willReturn($response);
+        $response->withHeader('X-Inertia', true)->willReturn($response);
+        $response->withHeader('Content-Type', 'application/json')->willReturn($response);
+
+        $inertia = new Inertia(
+            $request->reveal(),
+            $responseFactory->reveal(),
+            $streamFactory->reveal(),
+            $rootViewProvider->reveal()
+        );
+
+        $returnedResponse = $inertia->render(
+            Argument::type('string'),
+            [
+                'key1' => fn() => 'value1',
+                'key2' => fn() => 'value2'
+            ]
+        );
+
+        $this->assertInstanceOf(ResponseInterface::class, $returnedResponse);
+        $this->assertSame($json, $jsonResponse);
+    }
+
 }
