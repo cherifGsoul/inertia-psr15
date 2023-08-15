@@ -98,11 +98,9 @@ class InertiaTest extends TestCase
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->hasHeader('X-Inertia')->willReturn(true);
         $request->hasHeader('X-Inertia-Partial-Data')->willReturn(true);
-        $request->getHeaderLine('X-Inertia-Partial-Component')->willReturn(Argument::type('string'));
-        $request->getHeader('X-Inertia-Partial-Data')->willReturn([
-            'key2'
-        ]);
-        $json = '{"component":"type(string)","props":{"key2":"value2"},"url":"callback()","version":null}';
+        $request->getHeaderLine('X-Inertia-Partial-Component')->willReturn('component');
+        $request->getHeaderLine('X-Inertia-Partial-Data')->willReturn('key2');
+        $json = '{"component":"component","props":{"key2":"value2"},"url":"callback()","version":null}';
         $jsonResponse = null;
 
         $uri = $this->prophesize(UriInterface::class);
@@ -133,7 +131,7 @@ class InertiaTest extends TestCase
         );
 
         $returnedResponse = $inertia->render(
-            Argument::type('string'),
+            'component',
             [
                 'key1' => fn() => 'value1',
                 'key2' => fn() => 'value2'
