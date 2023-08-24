@@ -35,12 +35,11 @@ class Inertia implements InertiaInterface
     {
         $this->page = $this->page
                         ->withComponent($component)
-                        ->withProps($props)
                         ->withUrl((string)$this->request->getUri());
 
         if ($this->request->hasHeader('X-Inertia-Partial-Data')) {
-            $only = $this->request->getHeader('X-Inertia-Partial-Data');
-            $props = ($only && $this->request->getHeaderLine('X-Inertia-Partial-Component'))
+            $only = explode(',', $this->request->getHeaderLine('X-Inertia-Partial-Data'));
+            $props = ($only && $this->request->getHeaderLine('X-Inertia-Partial-Component') === $component)
             ? array_intersect_key($props, array_flip((array) $only))
             : $props;
         }
