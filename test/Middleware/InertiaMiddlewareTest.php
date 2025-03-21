@@ -50,7 +50,7 @@ class InertiaMiddlewareTest extends TestCase
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->withAttribute(InertiaMiddleware::INERTIA_ATTRIBUTE, Argument::that([$inertia, 'reveal']))->willReturn($request);
         $request->hasHeader('X-Inertia')->willReturn(true);
-        $request->getHeader('X-Inertia-Version')->willReturn('12345');
+        $request->getHeader('X-Inertia-Version')->willReturn(['12345']);
         $request->getMethod()->willReturn('GET');
         
         $factory->fromRequest($request)->willReturn($inertia);
@@ -82,7 +82,7 @@ class InertiaMiddlewareTest extends TestCase
         $request->getUri()->willReturn($uri);
         $request->withAttribute(InertiaMiddleware::INERTIA_ATTRIBUTE, $inertia->reveal())->willReturn($request);
         $request->hasHeader('X-Inertia')->willReturn(true);
-        $request->getHeader('X-Inertia-Version')->willReturn('12345');
+        $request->getHeader('X-Inertia-Version')->willReturn(['12345']);
         $request->getMethod()->willReturn('GET');
         
         $factory->fromRequest($request)->willReturn($inertia);
@@ -111,7 +111,7 @@ class InertiaMiddlewareTest extends TestCase
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->withAttribute(InertiaMiddleware::INERTIA_ATTRIBUTE, $inertia->reveal())->willReturn($request);
         $request->hasHeader('X-Inertia')->willReturn(true);
-        $request->getHeader('X-Inertia-Version')->willReturn('12345');
+        $request->getHeader('X-Inertia-Version')->willReturn(['12345']);
         $request->getMethod()->willReturn('PUT');
         
         $factory->fromRequest($request)->willReturn($inertia);
@@ -141,7 +141,7 @@ class InertiaMiddlewareTest extends TestCase
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->withAttribute(InertiaMiddleware::INERTIA_ATTRIBUTE, $inertia->reveal())->willReturn($request);
         $request->hasHeader('X-Inertia')->willReturn(true);
-        $request->getHeader('X-Inertia-Version')->willReturn('12345');
+        $request->getHeader('X-Inertia-Version')->willReturn(['12345']);
         $request->getMethod()->willReturn('POST');
 
         $factory->fromRequest($request)->willReturn($inertia);
