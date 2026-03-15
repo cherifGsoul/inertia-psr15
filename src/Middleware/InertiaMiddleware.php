@@ -56,12 +56,12 @@ class InertiaMiddleware implements MiddlewareInterface
         $request = $request->withAttribute($this->attributeKey, $this->inertia);
         
         if (!$request->hasHeader('X-Inertia')) {
-            return $handler->handle($request);
+            return $handler->handle($request)->withAddedHeader('Vary', 'X-Inertia');
         }
 
         /** @var Response */
         $response = $handler->handle($request)
-            ->withAddedHeader('Vary', 'Accept')
+            ->withAddedHeader('Vary', 'X-Inertia')
             ->withAddedHeader('X-Inertia', 'true');
         $response = $this->checkVersion($request, $response);
         $response = $this->changeRedirectCode($request, $response);
@@ -69,17 +69,19 @@ class InertiaMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @param $request
-     * @param $response
+     * @param Request $request
+     * @param Response $response
      * @return Response
      */
-    private function checkVersion($request, $response): Response
+    private function checkVersion(Request $request, Response $response): Response
     {
+        $version = $this->inertia->getVersion();
         if (
             'GET' === $request->getMethod()
-            && $request->getHeader('X-Inertia-Version') !== $this->inertia->getVersion()
+            && $version !== null
+            && $request->getHeaderLine('X-Inertia-Version') !== (string)$version
         ) {
-            return $response->withAddedHeader('X-Inertia-Location', $request->getUri()->getPath());
+            return $response->withStatus(409)->withHeader('X-Inertia-Location', (string)$request->getUri());
         }
 
         return $response;

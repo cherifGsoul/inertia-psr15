@@ -10,14 +10,15 @@
         }
     ],
     "require": {
-        "php": ">=7.4",
+        "php": "^8.2",
         "psr/http-server-middleware": "^1.0"
     },
     "require-dev": {
-        "laminas/laminas-diactoros": "^2.5",
+        "laminas/laminas-diactoros": "^3.0",
         "mezzio/mezzio-template": "^2.0",
-        "phpspec/prophecy-phpunit": "^2.0",
-        "phpunit/phpunit": "^9.4",
+        "phpstan/phpstan": "^1.10",
+        "phpspec/prophecy-phpunit": "^2.1",
+        "phpunit/phpunit": "^10.0 || ^11.0",
         "psr/container": "^1.0",
         "twig/twig": "^3.0"
     },

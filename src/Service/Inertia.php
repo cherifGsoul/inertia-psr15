@@ -32,25 +32,57 @@ class Inertia implements InertiaInterface
         $this->page = Page::create();
     }
 
-    public function render(string $component, array $props = [], string $url = null): ResponseInterface
+    public function render(string $component, array $props = [], ?string $url = null): ResponseInterface
     {
+        $props = array_merge($this->page->getProps(), $props);
         $this->page = $this->page
             ->withComponent($component)
             ->withUrl($url ?? (string)$this->request->getUri());
 
-        if ($this->request->hasHeader('X-Inertia-Partial-Data')) {
+        $only = [];
+        if (
+            $this->request->hasHeader('X-Inertia-Partial-Data')
+            && $this->request->getHeaderLine('X-Inertia-Partial-Component') === $component
+        ) {
             $only = explode(',', $this->request->getHeaderLine('X-Inertia-Partial-Data'));
-            $props = ($only && $this->request->getHeaderLine('X-Inertia-Partial-Component') === $component)
-            ? array_intersect_key($props, array_flip((array) $only))
-            : $props;
-        } else {
+        }
+
+        $except = [];
+        if (
+            $this->request->hasHeader('X-Inertia-Partial-Except')
+            && $this->request->getHeaderLine('X-Inertia-Partial-Component') === $component
+        ) {
+            $except = explode(',', $this->request->getHeaderLine('X-Inertia-Partial-Except'));
+        }
+
+        if ($only) {
+            $props = array_intersect_key($props, array_flip((array) $only));
+        }
+
+        if ($except) {
+            $props = array_diff_key($props, array_flip((array) $except));
+        }
+
+        if (empty($only) && empty($except)) {
             $props = array_filter($props, function ($prop) {
                 return ! $prop instanceof LazyProp;
             });
         }
 
+        // Handle Once props
+        if ($this->request->hasHeader('X-Inertia-Reset')) {
+            $reset = explode(',', $this->request->getHeaderLine('X-Inertia-Reset'));
+            $props = array_diff_key($props, array_flip((array) $reset));
+        }
+
+        foreach ($props as $key => $prop) {
+            if (is_callable($prop) || $prop instanceof LazyProp) {
+                $props[$key] = $prop();
+            }
+        }
+
         array_walk_recursive($props, function (&$prop) {
-            if ($prop instanceof \Closure || $prop instanceof LazyProp ) {
+            if (is_callable($prop) || $prop instanceof LazyProp ) {
                 $prop = $prop();
             }
         });
@@ -76,11 +108,54 @@ class Inertia implements InertiaInterface
     public function share(string $key, $value = null)
     {
         $this->page = $this->page->addProp($key, $value);
+        return $this;
     }
 
     public function getVersion(): ?string
     {
         return $this->page->getVersion();
+    }
+
+    public function defer(string $key, callable $callback, string $group = 'default'): self
+    {
+        $this->page = $this->page->withDeferredProps([$group => [$key]]);
+        return $this->share($key, $callback);
+    }
+
+    public function merge(string $key, $value): self
+    {
+        $this->page = $this->page->withMergeProps([$key]);
+        return $this->share($key, $value);
+    }
+
+    public function prepend(string $key, $value): self
+    {
+        $this->page = $this->page->withPrependProps([$key]);
+        return $this->share($key, $value);
+    }
+
+    public function deepMerge(string $key, $value): self
+    {
+        $this->page = $this->page->withDeepMergeProps([$key]);
+        return $this->share($key, $value);
+    }
+
+    public function once(string $key, $value): self
+    {
+        $this->page = $this->page->withOnceProps([$key => ['prop' => $key, 'expiresAt' => null]]);
+        return $this->share($key, $value);
+    }
+
+    public function encryptHistory(bool $encryptHistory = true): self
+    {
+        $this->page = $this->page->withEncryptHistory($encryptHistory);
+        return $this;
+    }
+
+    public function clearHistory(bool $clearHistory = true): self
+    {
+        $this->page = $this->page->withClearHistory($clearHistory);
+        return $this;
     }
 
     private function createResponse(string $data, string $contentType)
