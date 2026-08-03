@@ -26,7 +26,7 @@ class InertiaMiddlewareTest extends TestCase
         $factory->method('fromRequest')->with($this->identicalTo($request))->willReturn($inertia);
 
         $response = $this->createMock(ResponseInterface::class);
-        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler  = $this->createMock(RequestHandlerInterface::class);
         $handler->method('handle')->with($this->identicalTo($request))->willReturn($response);
 
         $middleware = new InertiaMiddleware($factory);

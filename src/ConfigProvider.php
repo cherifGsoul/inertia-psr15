@@ -44,11 +44,11 @@ class ConfigProvider
     {
         return [
             'invokables' => [],
-            'factories' => [
-                InertiaMiddleware::class => InertiaMiddlewareFactory::class,
+            'factories'  => [
+                InertiaMiddleware::class         => InertiaMiddlewareFactory::class,
                 RootViewProviderInterface::class => RootViewProviderFactory::class,
-                InertiaFactoryInterface::class => InertiaFactoryFactory::class,
-                InertiaExtension::class => InertiaExtensionFactory::class,
+                InertiaFactoryInterface::class   => InertiaFactoryFactory::class,
+                InertiaExtension::class          => InertiaExtensionFactory::class,
             ],
         ];
     }

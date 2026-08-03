@@ -20,8 +20,8 @@ class InertiaFactoryFactory
      */
     public function __invoke(ContainerInterface $container): InertiaFactory
     {
-        $responseFactory = $container->get(ResponseFactoryInterface::class);
-        $streamFactory = $container->get(StreamFactoryInterface::class);
+        $responseFactory  = $container->get(ResponseFactoryInterface::class);
+        $streamFactory    = $container->get(StreamFactoryInterface::class);
         $rootViewProvider = $container->get(RootViewProviderInterface::class);
 
         return new InertiaFactory($responseFactory, $streamFactory, $rootViewProvider);

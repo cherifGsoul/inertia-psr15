@@ -40,7 +40,7 @@ final class Page implements JsonSerializable
 
     public function withComponent(string $component): self
     {
-        $page = clone $this;
+        $page            = clone $this;
         $page->component = $component;
 
         return $page;
@@ -59,7 +59,7 @@ final class Page implements JsonSerializable
      */
     public function withProps(array $props): self
     {
-        $page = clone $this;
+        $page        = clone $this;
         $page->props = array_merge($page->props, $props);
 
         return $page;
@@ -72,7 +72,7 @@ final class Page implements JsonSerializable
 
     public function withUrl(string $url): self
     {
-        $page = clone $this;
+        $page      = clone $this;
         $page->url = $url;
 
         return $page;
@@ -85,7 +85,7 @@ final class Page implements JsonSerializable
 
     public function withVersion(string $version): self
     {
-        $page = clone $this;
+        $page          = clone $this;
         $page->version = $version;
 
         return $page;
@@ -96,15 +96,15 @@ final class Page implements JsonSerializable
     {
         return [
             'component' => $this->component,
-            'props' => $this->props,
-            'url' => $this->url,
-            'version' => $this->version,
+            'props'     => $this->props,
+            'url'       => $this->url,
+            'version'   => $this->version,
         ];
     }
 
     public function addProp(string $key, mixed $value = null): Page|static
     {
-        $page = clone $this;
+        $page              = clone $this;
         $page->props[$key] = $value;
 
         return $page;
