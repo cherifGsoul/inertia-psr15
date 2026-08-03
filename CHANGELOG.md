@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - Unreleased
+
+### Added
+- Inertia v3 partial reload support for `X-Inertia-Partial-Except` and nested prop paths.
+- `Inertia::optional()` for props that are only included when explicitly requested.
+
+### Changed
+- Twig initial-page markup now uses the Inertia v3 JSON `<script data-page="app">` element and a separate application mount point.
+- `InertiaMiddleware` is now stateless, preventing request state from being retained or shared by long-running and concurrent server workers.
+
+### Removed
+- `Inertia::lazy()` and `LazyProp`; use `Inertia::optional()` instead.
+
 ## [1.1.2] - 2026-05-11
 
 ### Added
@@ -52,4 +65,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fork initialization for sirix/inertia-psr15
 - Original project by Mohammed Cherif BOUCHELAGHEM (2021). 
 - This repository is a maintained fork initiated and maintained by Sirix (2025).
-

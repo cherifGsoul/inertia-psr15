@@ -17,8 +17,6 @@ class InertiaMiddleware implements MiddlewareInterface
 {
     public const INERTIA_ATTRIBUTE = 'inertia';
 
-    private InertiaInterface $inertia;
-
     /**
      * InertiaMiddleware constructor.
      */
@@ -29,9 +27,9 @@ class InertiaMiddleware implements MiddlewareInterface
 
     public function process(Request $request, Handler $handler): Response
     {
-        $this->inertia = $this->inertiaFactory->fromRequest($request);
+        $inertia = $this->inertiaFactory->fromRequest($request);
 
-        $request = $request->withAttribute($this->attributeKey, $this->inertia);
+        $request = $request->withAttribute($this->attributeKey, $inertia);
 
         if (! $request->hasHeader('X-Inertia')) {
             return $handler->handle($request);
@@ -42,16 +40,16 @@ class InertiaMiddleware implements MiddlewareInterface
             ->withAddedHeader('Vary', 'X-Inertia')
             ->withAddedHeader('X-Inertia', 'true')
         ;
-        $response = $this->checkVersion($request, $response);
+        $response = $this->checkVersion($request, $response, $inertia);
 
         return $this->changeRedirectCode($request, $response);
     }
 
-    private function checkVersion(Request $request, Response $response): Response
+    private function checkVersion(Request $request, Response $response, InertiaInterface $inertia): Response
     {
         if (
             'GET' === $request->getMethod()
-            && $request->getHeaderLine('X-Inertia-Version') !== (string) $this->inertia->getVersion()
+            && $request->getHeaderLine('X-Inertia-Version') !== (string) $inertia->getVersion()
         ) {
             return $response
                 ->withStatus(409)

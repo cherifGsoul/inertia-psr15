@@ -10,7 +10,6 @@ use Twig\Extension\AbstractExtension;
 use Twig\Markup;
 use Twig\TwigFunction;
 
-use function htmlspecialchars;
 use function json_encode;
 
 class InertiaExtension extends AbstractExtension
@@ -26,13 +25,12 @@ class InertiaExtension extends AbstractExtension
     public function inertia(Page $page): Markup
     {
         return new Markup(
-            '<div id="app" data-page="'
-            . htmlspecialchars(
-                json_encode($page, JSON_THROW_ON_ERROR),
-                ENT_QUOTES | ENT_SUBSTITUTE,
-                'UTF-8'
+            '<script data-page="app" type="application/json">'
+            . json_encode(
+                $page,
+                JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_THROW_ON_ERROR
             )
-            . '"></div>',
+            . '</script><div id="app"></div>',
             'UTF-8'
         );
     }

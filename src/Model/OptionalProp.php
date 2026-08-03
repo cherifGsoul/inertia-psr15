@@ -6,14 +6,9 @@ namespace Sirix\InertiaPsr15\Model;
 
 use function call_user_func;
 
-/**
- * NOTE: this is similar to Laravel Inertia\LazyProp.
- */
-final class LazyProp
+final class OptionalProp
 {
-    /**
-     * @var callable
-     */
+    /** @var callable */
     private $callback;
 
     public function __construct(callable $callable)

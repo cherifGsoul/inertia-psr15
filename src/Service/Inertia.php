@@ -10,22 +10,21 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use Sirix\InertiaPsr15\Model\LazyProp;
+use Sirix\InertiaPsr15\Model\OptionalProp;
 use Sirix\InertiaPsr15\Model\Page;
 
-use function array_filter;
-use function array_flip;
-use function array_intersect_key;
-use function array_map;
-use function array_values;
-use function array_walk_recursive;
-use function count;
+use function array_key_exists;
 use function explode;
+use function is_array;
 use function json_encode;
 use function trim;
 
 class Inertia implements InertiaInterface
 {
+    private const PARTIAL_RELOAD_STANDARD = 'standard';
+    private const PARTIAL_RELOAD_ONLY     = 'only';
+    private const PARTIAL_RELOAD_EXCEPT   = 'except';
+
     private readonly RootViewProviderInterface $rootViewProvider;
     private Page $page;
 
@@ -36,7 +35,7 @@ class Inertia implements InertiaInterface
         RootViewProviderInterface $rootViewProvider
     ) {
         $this->rootViewProvider = $rootViewProvider;
-        $this->page = Page::create();
+        $this->page             = Page::create();
     }
 
     /**
@@ -51,22 +50,15 @@ class Inertia implements InertiaInterface
             ->withUrl($url ?? (string) $this->request->getUri())
         ;
 
-        if ($this->request->hasHeader('X-Inertia-Partial-Data')) {
-            $only = explode(',', $this->request->getHeaderLine('X-Inertia-Partial-Data'));
-            // Normalize: trim and remove empty entries to avoid always-true comparisons and handle empty header correctly
-            $only = array_values(array_filter(array_map(trim(...), $only), static fn (string $v): bool => '' !== $v));
-            $props = ((count($only) > 0) && $this->request->getHeaderLine('X-Inertia-Partial-Component') === $component)
-            ? array_intersect_key($props, array_flip($only))
-            : $props;
-        } else {
-            $props = array_filter($props, fn ($prop) => ! $prop instanceof LazyProp);
+        $partialReload = $this->partialReloadContext($component);
+
+        if (self::PARTIAL_RELOAD_ONLY === $partialReload['mode']) {
+            $props = $this->onlyProps($props, $partialReload['paths']);
+        } elseif (self::PARTIAL_RELOAD_EXCEPT === $partialReload['mode']) {
+            $props = $this->exceptProps($props, $partialReload['paths']);
         }
 
-        array_walk_recursive($props, function(&$prop) {
-            if ($prop instanceof Closure || $prop instanceof LazyProp) {
-                $prop = $prop();
-            }
-        });
+        $props = $this->resolveProps($props, self::PARTIAL_RELOAD_ONLY === $partialReload['mode']);
 
         $this->page = $this->page->withProps($props);
 
@@ -77,7 +69,7 @@ class Inertia implements InertiaInterface
         }
 
         $rootViewProvider = $this->rootViewProvider;
-        $html = $rootViewProvider($this->page);
+        $html             = $rootViewProvider($this->page);
 
         return $this->createResponse($html, 'text/html; charset=UTF-8');
     }
@@ -97,9 +89,9 @@ class Inertia implements InertiaInterface
         return $this->page->getVersion();
     }
 
-    public static function lazy(callable $callable): LazyProp
+    public static function optional(callable $callable): OptionalProp
     {
-        return new LazyProp($callable);
+        return new OptionalProp($callable);
     }
 
     public function location(ResponseInterface|string $destination, int $status = 302): ResponseInterface
@@ -133,5 +125,210 @@ class Inertia implements InertiaInterface
             ->withBody($stream)
             ->withHeader('Content-Type', $contentType)
         ;
+    }
+
+    /** @return array{mode: string, paths: list<string>} */
+    private function partialReloadContext(string $component): array
+    {
+        if (
+            ! $this->request->hasHeader('X-Inertia')
+            || $this->request->getHeaderLine('X-Inertia-Partial-Component') !== $component
+        ) {
+            return [
+                'mode'  => self::PARTIAL_RELOAD_STANDARD,
+                'paths' => [],
+            ];
+        }
+
+        $except = $this->headerValues('X-Inertia-Partial-Except');
+        if ([] !== $except) {
+            return [
+                'mode'  => self::PARTIAL_RELOAD_EXCEPT,
+                'paths' => $except,
+            ];
+        }
+
+        $only = $this->headerValues('X-Inertia-Partial-Data');
+        if ([] !== $only) {
+            return [
+                'mode'  => self::PARTIAL_RELOAD_ONLY,
+                'paths' => $only,
+            ];
+        }
+
+        return [
+            'mode'  => self::PARTIAL_RELOAD_STANDARD,
+            'paths' => [],
+        ];
+    }
+
+    /** @return list<string> */
+    private function headerValues(string $header): array
+    {
+        if (! $this->request->hasHeader($header)) {
+            return [];
+        }
+
+        $values = [];
+
+        foreach (explode(',', $this->request->getHeaderLine($header)) as $value) {
+            $value = trim($value);
+
+            if ('' !== $value) {
+                $values[] = $value;
+            }
+        }
+
+        return $values;
+    }
+
+    /**
+     * @param array<string, mixed> $props
+     * @param list<string>         $paths
+     *
+     * @return array<string, mixed>
+     */
+    private function onlyProps(array $props, array $paths): array
+    {
+        $selected    = [];
+        $nestedPaths = [];
+
+        foreach ($paths as $path) {
+            if (array_key_exists($path, $props)) {
+                $selected[$path] = $props[$path];
+
+                continue;
+            }
+
+            $segments = explode('.', $path, 2);
+
+            if (! isset($segments[1])) {
+                continue;
+            }
+
+            $nestedPaths[$segments[0]][] = $segments[1];
+        }
+
+        foreach ($nestedPaths as $key => $paths) {
+            if (array_key_exists($key, $selected)) {
+                continue;
+            }
+
+            if (! array_key_exists($key, $props)) {
+                continue;
+            }
+
+            $prop = $this->resolveOnlyContainer($props[$key]);
+
+            if (! is_array($prop)) {
+                continue;
+            }
+
+            $nested = $this->onlyProps($prop, $paths);
+
+            if ([] !== $nested) {
+                $selected[$key] = $nested;
+            }
+        }
+
+        return $selected;
+    }
+
+    /**
+     * @param array<string, mixed> $props
+     * @param list<string>         $paths
+     *
+     * @return array<string, mixed>
+     */
+    private function exceptProps(array $props, array $paths): array
+    {
+        $nestedPaths = [];
+
+        foreach ($paths as $path) {
+            if (array_key_exists($path, $props)) {
+                unset($props[$path]);
+
+                continue;
+            }
+
+            $segments = explode('.', $path, 2);
+
+            if (isset($segments[1])) {
+                $nestedPaths[$segments[0]][] = $segments[1];
+            }
+        }
+
+        foreach ($nestedPaths as $key => $paths) {
+            if (! array_key_exists($key, $props)) {
+                continue;
+            }
+
+            while ($props[$key] instanceof Closure) {
+                $props[$key] = ($props[$key])();
+            }
+
+            if (is_array($props[$key])) {
+                $props[$key] = $this->exceptProps($props[$key], $paths);
+            }
+        }
+
+        return $props;
+    }
+
+    /**
+     * @param array<string, mixed> $props
+     *
+     * @return array<string, mixed>
+     */
+    private function resolveProps(array $props, bool $includeOptionalProps): array
+    {
+        foreach ($props as $key => $prop) {
+            $omit = false;
+            $prop = $this->resolveProp($prop, $includeOptionalProps, $omit);
+
+            if ($omit) {
+                unset($props[$key]);
+
+                continue;
+            }
+
+            $props[$key] = $prop;
+        }
+
+        return $props;
+    }
+
+    private function resolveProp(mixed $prop, bool $includeOptionalProps, bool &$omit): mixed
+    {
+        $omit = false;
+
+        if ($prop instanceof OptionalProp) {
+            if (! $includeOptionalProps) {
+                $omit = true;
+
+                return null;
+            }
+
+            return $this->resolveProp($prop(), true, $omit);
+        }
+
+        if ($prop instanceof Closure) {
+            return $this->resolveProp($prop(), $includeOptionalProps, $omit);
+        }
+
+        if (! is_array($prop)) {
+            return $prop;
+        }
+
+        return $this->resolveProps($prop, $includeOptionalProps);
+    }
+
+    private function resolveOnlyContainer(mixed $prop): mixed
+    {
+        while ($prop instanceof Closure || $prop instanceof OptionalProp) {
+            $prop = $prop();
+        }
+
+        return $prop;
     }
 }
