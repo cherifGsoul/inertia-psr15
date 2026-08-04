@@ -46,6 +46,12 @@ was selected as the template engine:
 composer require sirix/inertia-psr15
 ```
 
+### Container requirements
+
+The built-in factories resolve container services strictly through PSR-11. The following services must be registered with values implementing their declared interfaces: `ResponseFactoryInterface`, `StreamFactoryInterface`, `RootViewProviderInterface`, `TemplateRendererInterface`, and `InertiaFactoryInterface`.
+
+The `config` service is optional. When present, it must be an array; `inertia_psr15.root_view` is an optional non-empty string and defaults to `app.html.twig`. Missing services, wrong service types, and invalid configuration fail with an exception that identifies the factory and required value.
+
 2- Add the inertia middleware to the middlewares pipeline:
 
 ```php

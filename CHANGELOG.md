@@ -10,10 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Inertia v3 partial reload support for `X-Inertia-Partial-Except` and nested prop paths.
 - `Inertia::optional()` for props that are only included when explicitly requested.
+- Optional `inertia_psr15.root_view` configuration, defaulting to `app.html.twig`.
+- `sirix/container-resolver` to resolve factory services and configuration consistently.
 
 ### Changed
 - Twig initial-page markup now uses the Inertia v3 JSON `<script data-page="app">` element and a separate application mount point.
 - `InertiaMiddleware` is now stateless, preventing request state from being retained or shared by long-running and concurrent server workers.
+- Container factories now report missing and invalid required PSR-11 services consistently, with factory context.
 
 ### Removed
 - `Inertia::lazy()` and `LazyProp`; use `Inertia::optional()` instead.
