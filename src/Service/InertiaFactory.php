@@ -7,6 +7,7 @@ namespace Sirix\InertiaPsr15\Service;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\StreamFactoryInterface;
+use Sirix\InertiaPsr15\View\RootViewProviderInterface;
 
 class InertiaFactory implements InertiaFactoryInterface
 {

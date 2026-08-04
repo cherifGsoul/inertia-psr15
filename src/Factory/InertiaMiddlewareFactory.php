@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Sirix\InertiaPsr15\Middleware;
+namespace Sirix\InertiaPsr15\Factory;
 
 use InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Sirix\InertiaPsr15\Middleware\InertiaMiddleware;
 use Sirix\InertiaPsr15\Service\InertiaFactoryInterface;
 
 class InertiaMiddlewareFactory

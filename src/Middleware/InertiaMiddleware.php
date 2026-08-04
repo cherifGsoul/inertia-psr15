@@ -11,7 +11,15 @@ use Psr\Http\Server\RequestHandlerInterface as Handler;
 use Sirix\InertiaPsr15\Service\InertiaFactoryInterface;
 use Sirix\InertiaPsr15\Service\InertiaInterface;
 
+use function explode;
+use function implode;
 use function in_array;
+use function ltrim;
+use function preg_match;
+use function str_contains;
+use function strcasecmp;
+use function strlen;
+use function trim;
 
 class InertiaMiddleware implements MiddlewareInterface
 {
@@ -31,15 +39,15 @@ class InertiaMiddleware implements MiddlewareInterface
 
         $request = $request->withAttribute($this->attributeKey, $inertia);
 
+        $response = $handler->handle($request);
+
+        $response = $this->withInertiaVary($response);
+
         if (! $request->hasHeader('X-Inertia')) {
-            return $handler->handle($request);
+            return $response;
         }
 
-        /** @var Response */
-        $response = $handler->handle($request)
-            ->withAddedHeader('Vary', 'X-Inertia')
-            ->withAddedHeader('X-Inertia', 'true')
-        ;
+        $response = $response->withAddedHeader('X-Inertia', 'true');
         $response = $this->checkVersion($request, $response, $inertia);
 
         return $this->changeRedirectCode($request, $response);
@@ -53,7 +61,7 @@ class InertiaMiddleware implements MiddlewareInterface
         ) {
             return $response
                 ->withStatus(409)
-                ->withHeader('X-Inertia-Location', (string) $request->getUri())
+                ->withHeader('X-Inertia-Location', $this->requestLocation($request))
             ;
         }
 
@@ -70,7 +78,23 @@ class InertiaMiddleware implements MiddlewareInterface
             302 === $response->getStatusCode()
             && in_array($request->getMethod(), ['PUT', 'PATCH', 'DELETE'])
         ) {
-            return $response->withStatus(303);
+            $response = $response->withStatus(303);
+        }
+
+        if (
+            300 <= $response->getStatusCode()
+            && 400 > $response->getStatusCode()
+            && $response->hasHeader('Location')
+            && 'prefetch' !== $request->getHeaderLine('Purpose')
+        ) {
+            $location = $response->getHeaderLine('Location');
+            if (str_contains($location, '#') && $this->isSafeRedirectLocation($location)) {
+                return $response
+                    ->withStatus(409)
+                    ->withHeader('X-Inertia-Redirect', $location)
+                    ->withoutHeader('Location')
+                ;
+            }
         }
 
         // For External redirects
@@ -83,5 +107,51 @@ class InertiaMiddleware implements MiddlewareInterface
         }
 
         return $response;
+    }
+
+    private function withInertiaVary(Response $response): Response
+    {
+        $tokens = [];
+        foreach (explode(',', $response->getHeaderLine('Vary')) as $token) {
+            $token = trim($token);
+            if ('' !== $token) {
+                $tokens[] = $token;
+            }
+        }
+
+        foreach ($tokens as $token) {
+            if (0 === strcasecmp($token, 'X-Inertia')) {
+                return $response;
+            }
+        }
+
+        if ([] === $tokens) {
+            return $response->withAddedHeader('Vary', 'X-Inertia');
+        }
+
+        $tokens[] = 'X-Inertia';
+
+        return $response->withHeader('Vary', implode(', ', $tokens));
+    }
+
+    private function isSafeRedirectLocation(string $location): bool
+    {
+        return '' !== $location
+            && 8192 >= strlen($location)
+            && 1 !== preg_match('/[\x00-\x1F\x7F]/', $location);
+    }
+
+    private function requestLocation(Request $request): string
+    {
+        $uri      = $request->getUri();
+        $path     = '/' . ltrim($uri->getPath(), '/\\');
+        $query    = $uri->getQuery();
+        $location = $path . ('' === $query ? '' : '?' . $query);
+
+        if (8192 < strlen($location) || str_contains($location, '\\') || 1 === preg_match('/[\x00-\x1F\x7F]/', $location)) {
+            return '/';
+        }
+
+        return $location;
     }
 }

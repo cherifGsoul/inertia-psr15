@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Sirix\InertiaPsr15\Twig;
+namespace Sirix\InertiaPsr15\Factory;
 
 use Psr\Container\ContainerInterface;
+use Sirix\InertiaPsr15\Twig\InertiaExtension;
 
 class InertiaExtensionFactory
 {

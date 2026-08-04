@@ -10,7 +10,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Sirix\InertiaPsr15\Service\InertiaFactory;
-use Sirix\InertiaPsr15\Service\RootViewProviderInterface;
+use Sirix\InertiaPsr15\View\RootViewProviderInterface;
 
 class InertiaFactoryFactory
 {

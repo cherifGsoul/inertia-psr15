@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Sirix\InertiaPsr15;
 
+use Sirix\InertiaPsr15\Factory\InertiaExtensionFactory;
 use Sirix\InertiaPsr15\Factory\InertiaFactoryFactory;
+use Sirix\InertiaPsr15\Factory\InertiaMiddlewareFactory;
 use Sirix\InertiaPsr15\Factory\RootViewProviderFactory;
 use Sirix\InertiaPsr15\Middleware\InertiaMiddleware;
-use Sirix\InertiaPsr15\Middleware\InertiaMiddlewareFactory;
 use Sirix\InertiaPsr15\Service\InertiaFactoryInterface;
-use Sirix\InertiaPsr15\Service\RootViewProviderInterface;
 use Sirix\InertiaPsr15\Twig\InertiaExtension;
-use Sirix\InertiaPsr15\Twig\InertiaExtensionFactory;
+use Sirix\InertiaPsr15\View\RootViewProviderInterface;
 
 /**
  * The configuration provider for the InertiaPsr15 module.
@@ -26,12 +26,15 @@ class ConfigProvider
      * To add a bit of a structure, each section is defined in a separate
      * method which returns an array with its configuration.
      *
-     * @return array{dependencies: array{invokables: array<class-string, class-string>|array<empty, empty>, factories: array<class-string, class-string>}}
+     * @return array{dependencies: array{invokables: array<class-string, class-string>|array<empty, empty>, factories: array<class-string, class-string>}, inertia_psr15: array{root_view: string}}
      */
     public function __invoke(): array
     {
         return [
-            'dependencies' => $this->getDependencies(),
+            'dependencies'  => $this->getDependencies(),
+            'inertia_psr15' => [
+                'root_view' => 'app.html.twig',
+            ],
         ];
     }
 

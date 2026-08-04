@@ -8,7 +8,10 @@ use Mezzio\Template\TemplateRendererInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Sirix\InertiaPsr15\Service\RootViewProviderDecorator;
+use Sirix\InertiaPsr15\View\RootViewProviderDecorator;
+
+use function is_array;
+use function is_string;
 
 class RootViewProviderFactory
 {
@@ -19,9 +22,15 @@ class RootViewProviderFactory
     public function __invoke(ContainerInterface $container): RootViewProviderDecorator
     {
         $templateRenderer = $container->get(TemplateRendererInterface::class);
+        $config           = $container->has('config') ? $container->get('config') : [];
+
+        $rootView = 'app.html.twig';
+        if (is_array($config) && isset($config['inertia_psr15']['root_view']) && is_string($config['inertia_psr15']['root_view'])) {
+            $rootView = $config['inertia_psr15']['root_view'];
+        }
 
         $callback = (static fn (string $template, array $params): string => $templateRenderer->render($template, $params));
 
-        return new RootViewProviderDecorator($callback, 'app.html.twig');
+        return new RootViewProviderDecorator($callback, $rootView);
     }
 }

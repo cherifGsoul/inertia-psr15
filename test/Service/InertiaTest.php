@@ -13,7 +13,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 use Sirix\InertiaPsr15\Service\Inertia;
-use Sirix\InertiaPsr15\Service\RootViewProviderInterface;
+use Sirix\InertiaPsr15\View\RootViewProviderInterface;
 
 class InertiaTest extends TestCase
 {
@@ -38,7 +38,7 @@ class InertiaTest extends TestCase
         $stream        = $this->createMock(StreamInterface::class);
         $streamFactory = $this->createMock(StreamFactoryInterface::class);
 
-        $expectedJson    = '{"component":"component","props":[],"url":"\/","version":null}';
+        $expectedJson    = '{"component":"component","props":{"errors":{}},"url":"\/","version":null}';
         $capturedPayload = null;
 
         $streamFactory
@@ -161,7 +161,7 @@ class InertiaTest extends TestCase
             ['X-Inertia-Partial-Component', 'component'],
             ['X-Inertia-Partial-Data', 'key2'],
         ]);
-        $json         = '{"component":"component","props":{"key2":"value2"},"url":"callback()","version":null}';
+        $json         = '{"component":"component","props":{"errors":{},"key2":"value2"},"url":"callback()","version":null}';
         $jsonResponse = null;
 
         $uri = $this->createMock(UriInterface::class);
@@ -215,7 +215,7 @@ class InertiaTest extends TestCase
             ['X-Inertia-Partial-Data', false],
         ]);
         $invalidJson  = '{"component":"component","props":{"key1":"value1","key2":"value2"},"url":"callback()","version":null}';
-        $validJson    = '{"component":"component","props":{"key1":"value1","key2":"value2"},"url":"\/test\/url","version":null}';
+        $validJson    = '{"component":"component","props":{"errors":{},"key1":"value1","key2":"value2"},"url":"\/test\/url","version":null}';
         $jsonResponse = null;
 
         $uri = $this->createMock(UriInterface::class);
@@ -270,7 +270,7 @@ class InertiaTest extends TestCase
             ['X-Inertia-Partial-Data', false],
         ]);
         $invalidJson  = '{"component":"component","props":{"key1":"value1","key2":"value2","auth":{"notifications":["New message"],"user":"Jane"}},"url":"callback()","version":null}';
-        $validJson    = '{"component":"component","props":{"key2":"value2","auth":{"user":"Jane"}},"url":"callback()","version":null}';
+        $validJson    = '{"component":"component","props":{"errors":{},"key2":"value2","auth":{"user":"Jane"}},"url":"callback()","version":null}';
         $jsonResponse = null;
 
         $uri = $this->createMock(UriInterface::class);
@@ -334,7 +334,7 @@ class InertiaTest extends TestCase
             ['X-Inertia-Partial-Data', 'key1'],
         ]);
         $invalidJson  = '{"component":"component","props":{"key2":"value2"},"url":"callback()","version":null}';
-        $validJson    = '{"component":"component","props":{"key1":"value1"},"url":"callback()","version":null}';
+        $validJson    = '{"component":"component","props":{"errors":{},"key1":"value1"},"url":"callback()","version":null}';
         $jsonResponse = null;
 
         $uri = $this->createMock(UriInterface::class);
@@ -424,7 +424,7 @@ class InertiaTest extends TestCase
         ]);
 
         $this->assertSame(
-            '{"component":"component","props":{"auth":{"notifications":["New message"]}},"url":"callback()","version":null}',
+            '{"component":"component","props":{"errors":{},"auth":{"notifications":["New message"]}},"url":"callback()","version":null}',
             $jsonResponse
         );
     }
@@ -476,7 +476,7 @@ class InertiaTest extends TestCase
         ]);
 
         $this->assertSame(
-            '{"component":"component","props":{"auth":{"user":"Jane"},"settings":{"theme":"dark"}},"url":"callback()","version":null}',
+            '{"component":"component","props":{"errors":{},"auth":{"user":"Jane"},"settings":{"theme":"dark"}},"url":"callback()","version":null}',
             $jsonResponse
         );
     }
@@ -494,7 +494,7 @@ class InertiaTest extends TestCase
         ]);
 
         $this->assertSame(
-            '{"component":"component","props":{"feature.flag":true},"url":"callback()","version":null}',
+            '{"component":"component","props":{"errors":{},"feature":{"flag":false}},"url":"callback()","version":null}',
             $json
         );
     }
@@ -513,7 +513,7 @@ class InertiaTest extends TestCase
         ], 'feature.flag');
 
         $this->assertSame(
-            '{"component":"component","props":{"feature":{"flag":false},"keep":true},"url":"callback()","version":null}',
+            '{"component":"component","props":{"errors":{},"feature":[],"keep":true},"url":"callback()","version":null}',
             $json
         );
     }
@@ -532,7 +532,7 @@ class InertiaTest extends TestCase
             ]);
 
             $this->assertSame(
-                '{"component":"component","props":{"auth":{"user":"Jane","role":"admin"}},"url":"callback()","version":null}',
+                '{"component":"component","props":{"errors":{},"auth":{"user":"Jane","role":"admin"}},"url":"callback()","version":null}',
                 $json
             );
         }
@@ -559,7 +559,7 @@ class InertiaTest extends TestCase
 
         $this->assertSame(1, $authCalls);
         $this->assertSame(
-            '{"component":"component","props":{"auth":{"user":"Jane","notifications":["New message"]}},"url":"callback()","version":null}',
+            '{"component":"component","props":{"errors":{},"auth":{"user":"Jane","notifications":["New message"]}},"url":"callback()","version":null}',
             $json
         );
     }
