@@ -125,6 +125,16 @@ return [
 6- The adapter needs just one backend template to render the application, and by default it will look for 
 `templates/app.html.twig` if a default template is not configured, the app template can be like the following:
 
+The template name can be changed through application configuration:
+
+```php
+return [
+    'inertia_psr15' => [
+        'root_view' => 'inertia/app.html.twig',
+    ],
+];
+```
+
 ```html
 <!DOCTYPE html>
 <html lang="en" class="dark">
