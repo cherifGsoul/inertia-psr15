@@ -1,0 +1,12 @@
+{
+    "require-dev": {
+        "ergebnis/composer-normalize": "^2.52.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true
+        },
+        "bump-after-update": "dev",
+        "sort-packages": true
+    }
+}

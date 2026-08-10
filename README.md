@@ -1,5 +1,7 @@
 # Sirix inertia-psr15
 
+[![Latest Stable Version](http://poser.pugx.org/sirix/inertia-psr15/v)](https://packagist.org/packages/sirix/inertia-psr15) [![Total Downloads](http://poser.pugx.org/sirix/inertia-psr15/downloads)](https://packagist.org/packages/sirix/inertia-psr15) [![Latest Unstable Version](http://poser.pugx.org/sirix/inertia-psr15/v/unstable)](https://packagist.org/packages/sirix/inertia-psr15) [![License](http://poser.pugx.org/sirix/inertia-psr15/license)](https://packagist.org/packages/sirix/inertia-psr15) [![PHP Version Require](http://poser.pugx.org/sirix/inertia-psr15/require/php)](https://packagist.org/packages/sirix/inertia-psr15)
+
 This is a maintained fork of https://github.com/cherifGsoul/inertia-psr15. It preserves the original goal while updating PHP versions, tooling, and namespace/package details for this fork. See “Fork notes” below for differences.
 
 Before using this library, it’s important to know [what is Inertia.js](https://inertiajs.com/#top), [what is it for](https://inertiajs.com/who-is-it-for) and [how it works](https://inertiajs.com/how-it-works), on the [official Inertia.js website](https://inertiajs.com/).
