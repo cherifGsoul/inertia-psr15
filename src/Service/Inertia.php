@@ -76,13 +76,13 @@ class Inertia implements InertiaInterface
         }
 
         foreach ($props as $key => $prop) {
-            if (is_callable($prop) || $prop instanceof LazyProp) {
+            if ($prop instanceof \Closure || $prop instanceof LazyProp) {
                 $props[$key] = $prop();
             }
         }
 
         array_walk_recursive($props, function (&$prop) {
-            if (is_callable($prop) || $prop instanceof LazyProp ) {
+            if ($prop instanceof \Closure || $prop instanceof LazyProp) {
                 $prop = $prop();
             }
         });
